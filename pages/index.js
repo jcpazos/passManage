@@ -1,4 +1,5 @@
-import Head from 'next/head'
+import Head from "next/head";
+import { LockClosed, LockClosedIcon } from "@heroicons/react/solid";
 
 export default function Home() {
   return (
@@ -8,7 +9,15 @@ export default function Home() {
         {/*<link rel="icon" href="/favicon.ico" />*/}
       </Head>
 
-    <h1>This is a password manager.</h1> 
+      <img src="./images/keyhole.png"></img>
+      <div className="flex">
+        <input
+          className="w-60 text-center border-2 border-gray-600"
+          placeholder="Enter your Master Password"
+          type="text"
+        />
+        <LockClosedIcon className="button border-2 border-gray-600" />
+      </div>
     </div>
-  )
+  );
 }
