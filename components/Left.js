@@ -17,6 +17,7 @@ import {
   IdentificationIcon,
   ArchiveIcon,
 } from "@heroicons/react/solid";
+import LeftComponent from "./LeftComponent";
 
 function Left() {
   useEffect(() => {
@@ -62,15 +63,8 @@ function Left() {
           </div>
         </div>
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <CubeTransparentIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">All items</h2>
-        </div>
-
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <StarIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Favorites</h2>
-        </div>
+        <LeftComponent icon="cubeIcon" description="All items" />
+        <LeftComponent icon="starIcon" description="Favorites" />
 
         <br></br>
         {/*Watchtower Icons*/}
@@ -78,73 +72,48 @@ function Left() {
           <h2 className="text-grey-500 pl-4">WATCHTOWER</h2>
         </div>
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <ExclamationIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Compromised Websites</h2>
-        </div>
+        <LeftComponent
+          icon="exclamationIcon"
+          description="Compromised Websites"
+        />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <LockOpenIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Vulnerable Passwords</h2>
-        </div>
+        <LeftComponent icon="lockOpenIcon" description="Vulnerable Passwords" />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <RefreshIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Reused Passwords</h2>
-        </div>
+        <LeftComponent icon="refreshIcon" description="Reused Passwords" />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <ExclamationCircleIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Weak Passwords</h2>
-        </div>
+        <LeftComponent
+          icon="exclamationCircleIcon"
+          description="Weak Passwords"
+        />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <ShieldExclamationIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Unsecured Websites</h2>
-        </div>
+        <LeftComponent
+          icon="shieldExclamationIcon"
+          description="Unsecured Websites"
+        />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <WifiIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">
-            Two-Factor Authentication
-          </h2>
-        </div>
+        <LeftComponent
+          icon="wifiIcon"
+          description="Two-Factor Authentication"
+        />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <ClockIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Expiring</h2>
-        </div>
+        <LeftComponent icon="clockIcon" description="Expiring" />
 
         <br></br>
         {/*Categories Icons*/}
         <div className="pl-1 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
           <h2 className="text-grey-500 pl-4">CATEGORIES</h2>
         </div>
+        <LeftComponent icon="lockClosedIcon" description="Logins" />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <LockClosedIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Logins</h2>
-        </div>
+        <LeftComponent icon="paperClipIcon" description="Secure Notes" />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <PaperClipIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Secure Notes</h2>
-        </div>
+        <LeftComponent icon="creditCardIcon" description="Credit Cards" />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <CreditCardIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Credit Cards</h2>
-        </div>
+        <LeftComponent icon="identificationIcon" description="Identities" />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <IdentificationIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Identities</h2>
-        </div>
+        <LeftComponent icon="archiveIcon" description="Archives" />
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <KeyIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Passwords</h2>
-        </div>
+        <LeftComponent icon="keyIcon" description="Passwords" />
 
         <br></br>
         {/*Tags Icons*/}
@@ -152,10 +121,7 @@ function Left() {
           <h2 className="text-grey-500 pl-4">TAGS</h2>
         </div>
 
-        <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
-          <ArchiveIcon className="text-whiterounded w-5 l-5 border-r border-gray-500" />
-          <h2 className="text-grey-500 pl-4 truncate">Archive</h2>
-        </div>
+        <LeftComponent icon="archiveIcon" description="Archive" />
       </div>
       <div
         className="bg-gray-500 flex-shrink-0 pt-0 overflow-y-scroll scrollbar-hide  h-screen w-1 opacity-0 hover:opacity-100"

@@ -90,7 +90,7 @@ export const getServerSideProps = withAuthUserTokenSSR({
   // You can return anything you'd normally return from
   // `getServerSideProps`, including redirects.
   // https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering
-  /*const token = await AuthUser.getIdToken();
+  const token = await AuthUser.getIdToken();
 
   // Note: you shouldn't typically fetch your own API routes from within
   // `getServerSideProps`. This is for example purposes only.
@@ -109,7 +109,7 @@ export const getServerSideProps = withAuthUserTokenSSR({
         data
       )}`
     );
-  }*/
+  }
 });
 
 export default withAuthUser({

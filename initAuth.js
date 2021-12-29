@@ -15,24 +15,21 @@ const initAuth = () => {
     },
     firebaseAdminInitConfig: {
       credential: {
-        projectId: "password-manager-93034",
-        clientEmail:
-          "firebase-adminsdk-3tv2c@password-manager-93034.iam.gserviceaccount.com",
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY
           ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/gm, "\n")
           : undefined,
       },
-      databaseURL: "https://password-manager-93034.firebaseio.com",
+      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
     },
     // Use application default credentials (takes precedence over fireaseAdminInitConfig if set)
     // useFirebaseAdminDefaultCredential: true,
     firebaseClientInitConfig: {
-      apiKey: "AIzaSyB0jIbzw3fXrFOPFbvBPK6RJRLj7sIulYQ",
-      authDomain: "password-manager-93034.firebaseapp.com",
-      projectId: "password-manager-93034",
-      storageBucket: "password-manager-93034.appspot.com",
-      messagingSenderId: "284711772153",
-      appId: "1:284711772153:web:08365d489b5cd7631e6728",
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY,
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
     },
     cookies: {
       name: "passManage", // required
@@ -47,7 +44,7 @@ const initAuth = () => {
       overwrite: true,
       path: "/",
       sameSite: "strict",
-      secure: true, // set this to false in local (non-HTTPS) development
+      secure: process.env.NEXT_PUBLIC_COOKIE_SECURE === "true",
       signed: true,
     },
     onVerifyTokenError: (err) => {
