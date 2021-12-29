@@ -18,7 +18,9 @@ const initAuth = () => {
         projectId: "password-manager-93034",
         clientEmail:
           "firebase-adminsdk-3tv2c@password-manager-93034.iam.gserviceaccount.com",
-        privateKey: process.env.FIREBASE_PRIVATE_KEY,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY
+          ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/gm, "\n")
+          : undefined,
       },
       databaseURL: "https://password-manager-93034.firebaseio.com",
     },

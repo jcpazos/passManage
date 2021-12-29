@@ -1,3 +1,9 @@
+import {
+  useAuthUser,
+  withAuthUser,
+  withAuthUserTokenSSR,
+  AuthAction,
+} from "next-firebase-auth";
 import Head from "next/head";
 import { LockClosed, LockClosedIcon } from "@heroicons/react/solid";
 import { useState } from "react";
@@ -5,8 +11,11 @@ import Main from "../components/Main";
 import Left from "../components/Left";
 import Center from "../components/Center";
 import Right from "../components/Right";
+import getAbsoluteURL from "../utils/getAbsoluteURL";
+import Header from "../components/Header";
 
-export default function Home() {
+const Home = () => {
+  const AuthUser = useAuthUser();
   const [showResults, setShowResults] = useState(false);
   const [input, setInput] = useState("");
   const [lockColor, setLockColor] = useState("text-grey-500");
@@ -61,12 +70,48 @@ export default function Home() {
       )}
 
       {showResults && (
-        <main className="flex">
-          <Left />
-          <Center />
-          <Right />
-        </main>
+        <div className="flex-col">
+          <Header email={AuthUser.email} signOut={AuthUser.signOut} />
+          <main className="flex">
+            <Left />
+            <Center />
+            <Right />
+          </main>
+        </div>
       )}
     </div>
   );
-}
+};
+
+export const getServerSideProps = withAuthUserTokenSSR({
+  whenUnauthed: AuthAction.REDIRECT_TO_LOGIN,
+})(async ({ AuthUser, req }) => {
+  // Optionally, get other props.
+  // You can return anything you'd normally return from
+  // `getServerSideProps`, including redirects.
+  // https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering
+  /*const token = await AuthUser.getIdToken();
+
+  // Note: you shouldn't typically fetch your own API routes from within
+  // `getServerSideProps`. This is for example purposes only.
+  // https://github.com/gladly-team/next-firebase-auth/issues/264
+  const endpoint = getAbsoluteURL("/api/example", req);
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: {
+      Authorization: token || "unauthenticated",
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      `Data fetching failed with status ${response.status}: ${JSON.stringify(
+        data
+      )}`
+    );
+  }*/
+});
+
+export default withAuthUser({
+  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
+})(Home);
