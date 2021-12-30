@@ -25,7 +25,7 @@ const styles = {
 };
 
 const Header = ({ email, signOut }) => (
-  <div class="bg-gray-800 sticky text-white h-4" style={styles.container}>
+  <div className="bg-gray-800 sticky text-white h-4" style={styles.container}>
     <p>Signed in as {email}</p>
     <button
       type="button"

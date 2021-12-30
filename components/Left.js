@@ -18,8 +18,11 @@ import {
   ArchiveIcon,
 } from "@heroicons/react/solid";
 import LeftComponent from "./LeftComponent";
+import { useAuthUser } from "next-firebase-auth";
 
 function Left() {
+  const AuthUser = useAuthUser();
+
   useEffect(() => {
     var resize = document.getElementById("sidebar-resize");
     var left = document.getElementById("sidebar-left");
@@ -36,7 +39,7 @@ function Left() {
 
     container.addEventListener("mousemove", function (e) {
       moveX = e.x;
-      if (drag && moveX > 50)
+      if (drag && moveX > 200 && moveX < 250)
         left.style.width =
           moveX - resize.getBoundingClientRect().width / 2 + "px";
     });
@@ -49,16 +52,17 @@ function Left() {
   return (
     <div
       id="sidebar-container"
-      className="text-gray-200 text-xs lg:text-sm  border-r border-gray-900
+      className="text-gray-200 text-xs lg:text-sm min-w-max  border-r border-gray-900
     overflow-y-scroll scrollbar-hide  h-screen sm:max-w-[12rem] lg:max-w-[15rem] hidden md:inline-flex
     pb-36 bg-gray-500"
     >
-      {/*TODO: refactor icons into a component*/}
       <div id="sidebar-left" className="w-max flex-shrink">
-        <div className="pl-5 pt-5 pb-3 flex items-center hover:bg-gray-400">
-          <FlagIcon className="text-white bg-blue-500 rounded w-10 l-10 border-r border-gray-500" />
+        <div className="pl-5 pt-5 pb-3 flex items-center hover:bg-gray-400 hover:cursor-default">
+          <FlagIcon className="text-white bg-blue-500 rounded w-10 h-10 border-r border-gray-500" />
           <div className="flex-col">
-            <h1 className="text-grey-500 pl-2">Jose Carlos Pazos</h1>
+            <h1 className="text-grey-500 pl-2">
+              {AuthUser.displayName ? AuthUser.displayName : "Anonymous"}
+            </h1>
             <h2 className="text-grey-500 pl-2">1 vaults</h2>
           </div>
         </div>
@@ -68,7 +72,7 @@ function Left() {
 
         <br></br>
         {/*Watchtower Icons*/}
-        <div className="pl-1 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
+        <div className="pl-1 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400 hover:cursor-default">
           <h2 className="text-grey-500 pl-4">WATCHTOWER</h2>
         </div>
 
@@ -100,7 +104,7 @@ function Left() {
 
         <br></br>
         {/*Categories Icons*/}
-        <div className="pl-1 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
+        <div className="pl-1 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400 hover:cursor-default">
           <h2 className="text-grey-500 pl-4">CATEGORIES</h2>
         </div>
         <LeftComponent icon="lockClosedIcon" description="Logins" />
@@ -117,14 +121,14 @@ function Left() {
 
         <br></br>
         {/*Tags Icons*/}
-        <div className="pl-1 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400">
+        <div className="pl-1 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400 hover:cursor-default">
           <h2 className="text-grey-500 pl-4">TAGS</h2>
         </div>
 
         <LeftComponent icon="archiveIcon" description="Archive" />
       </div>
       <div
-        className="bg-gray-500 flex-shrink-0 pt-0 overflow-y-scroll scrollbar-hide  h-screen w-1 opacity-0 hover:opacity-100"
+        className="bg-gray-500 flex-shrink-0 pt-0 overflow-y-scroll scrollbar-hide  h-screen w-1 opacity-0 hover:opacity-100 "
         style={{ cursor: "col-resize" }}
         id="sidebar-resize"
       ></div>

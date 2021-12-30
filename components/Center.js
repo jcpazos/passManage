@@ -1,6 +1,11 @@
+import { LoginIcon, PlusSmIcon } from "@heroicons/react/solid";
 import React, { useEffect } from "react";
+import { useRecoilState } from "recoil";
+import { vaultState } from "../atoms/vaultAtom";
 
 function Center() {
+  const [vault, setVault] = useRecoilState(vaultState);
+
   useEffect(() => {
     var resize = document.getElementById("sidebar-center-resize");
     var left = document.getElementById("sidebar-center-left");
@@ -17,7 +22,7 @@ function Center() {
 
     container.addEventListener("mousemove", function (e) {
       moveX = e.x;
-      if (drag && moveX > 50)
+      if (drag && moveX > 200)
         left.style.width =
           moveX - resize.getBoundingClientRect().width / 2 + "px";
     });
@@ -27,18 +32,47 @@ function Center() {
     });
   }, []);
 
+  const addLogin = () => {
+    console.log("add login");
+  };
+
   return (
     <div
       id="sidebar-center-container"
-      className="text-gray-500 pl-5 pt-5 text-xs lg:text-sm  border-r border-gray-900
-    overflow-y-scroll  h-screen sm:max-w-[12rem] lg:max-w-[30rem] hidden md:inline-flex
+      className="flex text-gray-500 text-xs lg:text-sm  border-r border-gray-900
+    overflow-y-scroll  h-screen sm:max-w-[12rem] lg:max-w-[30rem] md:inline-flex
     pb-36"
     >
-      <div id="sidebar-center-left" className="space-y-4  flex-shrink">
-        <h1>Center</h1>
+      <div id="sidebar-center-left" className="space-y-4  flex-shrink w-80 ">
+        <div className="flex-grow">
+          <div className="bg-gray-300 h-10 flex justify-center">
+            <h1 className="pt-2">{vault.length + " items"}</h1>
+          </div>
+          <div className="flex justify-end">
+            <PlusSmIcon
+              onClick={addLogin}
+              className="text-gray-400 bg-white rounded w-10 h-10 border-2 border-gray-600 hover:cursor-pointer button"
+            />
+          </div>
+        </div>
+
+        <div className="pl-5 flex-col">
+          {vault.map((login) => (
+            <div
+              className=" pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400 hover:cursor-default"
+              key={login.name}
+            >
+              <LoginIcon className="text-whiterounded w-10 h-10 border-r border-gray-500"></LoginIcon>
+              <div className="flex-col">
+                <h1 className="text-gray-500 pl-2">{login.name}</h1>
+                <h2 className="text-gray-500 pl-2">{login.username}</h2>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
       <div
-        className="bg-gray-500 flex-shrink-0 pt-0 overflow-y-scroll scrollbar-hide  h-screen w-1 opacity-0 hover:opacity-100"
+        className="bg-gray-500 flex-shrink-0 pt-0 overflow-y-scroll  scrollbar-hide h-screen w-1 opacity-0 hover:opacity-100"
         style={{ cursor: "col-resize" }}
         id="sidebar-center-resize"
       ></div>

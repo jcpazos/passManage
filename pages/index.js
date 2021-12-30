@@ -6,19 +6,37 @@ import {
 } from "next-firebase-auth";
 import Head from "next/head";
 import { LockClosed, LockClosedIcon } from "@heroicons/react/solid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Main from "../components/Main";
 import Left from "../components/Left";
 import Center from "../components/Center";
 import Right from "../components/Right";
 import getAbsoluteURL from "../utils/getAbsoluteURL";
 import Header from "../components/Header";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { useRecoilState } from "recoil";
+import { vaultState } from "../atoms/vaultAtom";
 
 const Home = () => {
   const AuthUser = useAuthUser();
   const [showResults, setShowResults] = useState(false);
   const [input, setInput] = useState("");
   const [lockColor, setLockColor] = useState("text-grey-500");
+  const [vault, setVault] = useRecoilState(vaultState);
+
+  useEffect(() => {
+    let vaultArray = [];
+    const db = getFirestore();
+    getDocs(collection(db, "vaults")).then((snapshot) => {
+      snapshot.forEach((doc) => {
+        if (doc.data().owner === AuthUser.email) {
+          vaultArray = vaultArray.concat(doc.data().logins);
+          console.log(doc.id, " => ", doc.data());
+        }
+      });
+      setVault(vaultArray);
+    });
+  }, []);
 
   const verifyPassword = (password) => {
     if (password === "password") {
