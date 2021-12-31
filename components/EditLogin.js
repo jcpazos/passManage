@@ -2,7 +2,7 @@ import React from "react";
 
 function EditLogin() {
   return (
-    <div>
+    <div className="justify-center">
       <h1>Edit</h1>
     </div>
   );

@@ -7,7 +7,7 @@ function Right() {
   const [login, setLogin] = useRecoilState(loginState);
 
   return (
-    <div className="lg:max-w-[15rem]">
+    <div id="sidebar-right-container" className="flex justify-center w-max">
       {login === "new" ? (
         <EditLogin />
       ) : (
