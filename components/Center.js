@@ -1,10 +1,13 @@
 import { LoginIcon, PlusSmIcon } from "@heroicons/react/solid";
 import React, { useEffect } from "react";
 import { useRecoilState } from "recoil";
+import { loginState } from "../atoms/loginAtom";
 import { vaultState } from "../atoms/vaultAtom";
+import LoginComponent from "./LoginComponent";
 
 function Center() {
   const [vault, setVault] = useRecoilState(vaultState);
+  const [login, setLogin] = useRecoilState(loginState);
 
   useEffect(() => {
     var resize = document.getElementById("sidebar-center-resize");
@@ -33,7 +36,7 @@ function Center() {
   }, []);
 
   const addLogin = () => {
-    console.log("add login");
+    setLogin("new");
   };
 
   return (
@@ -58,15 +61,8 @@ function Center() {
 
         <div className="pl-5 flex-col">
           {vault.map((login) => (
-            <div
-              className=" pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400 hover:cursor-default"
-              key={login.name}
-            >
-              <LoginIcon className="text-whiterounded w-10 h-10 border-r border-gray-500"></LoginIcon>
-              <div className="flex-col">
-                <h1 className="text-gray-500 pl-2">{login.name}</h1>
-                <h2 className="text-gray-500 pl-2">{login.username}</h2>
-              </div>
+            <div key={login.name} onClick={() => setLogin(login)}>
+              <LoginComponent name={login.name} username={login.username} />
             </div>
           ))}
         </div>
