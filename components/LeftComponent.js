@@ -41,7 +41,7 @@ function LeftComponent({ icon, description }) {
   return (
     <div>
       <div className="pl-8 pt-1 pb-1 flex items-center hover:bg-gray-400 hover:rounded hover:border-2 hover:border-blue-400 hover:cursor-default">
-        <MyIcon className="text-whiterounded w-5 h-5 border-r border-gray-500" />
+        <MyIcon className="text-whiterounded w-5 h-5  border-gray-500" />
         <h2 className="text-white pl-4 truncate">{description}</h2>
       </div>
     </div>

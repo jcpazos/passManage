@@ -88,7 +88,7 @@ const Home = () => {
       )}
 
       {showResults && (
-        <div className="flex-col">
+        <div className="bg-gray-100 flex-col">
           <Header email={AuthUser.email} signOut={AuthUser.signOut} />
           <main className="flex">
             <Left />

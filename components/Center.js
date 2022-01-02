@@ -44,7 +44,7 @@ function Center() {
       id="sidebar-center-container"
       className="flex text-gray-500 text-xs lg:text-sm  border-r border-gray-900
     overflow-y-scroll  h-screen sm:max-w-[12rem] lg:max-w-[30rem] md:inline-flex
-    pb-36"
+    pb-36 bg-white"
     >
       <div id="sidebar-center-left" className="space-y-4  flex-shrink w-80 ">
         <div className="flex-grow">

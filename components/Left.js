@@ -54,11 +54,11 @@ function Left() {
       id="sidebar-container"
       className="text-gray-200 text-xs lg:text-sm min-w-max  border-r border-gray-900
     overflow-y-scroll scrollbar-hide  h-screen sm:max-w-[12rem] lg:max-w-[15rem] hidden md:inline-flex
-    pb-36 bg-gray-500"
+    pb-36 bg-gray-500 float-left"
     >
       <div id="sidebar-left" className="w-max flex-shrink">
         <div className="pl-5 pt-5 pb-3 flex items-center hover:bg-gray-400 hover:cursor-default">
-          <FlagIcon className="text-white bg-blue-500 rounded w-10 h-10 border-r border-gray-500" />
+          <FlagIcon className="text-white bg-blue-500 rounded w-10 h-10  border-gray-500" />
           <div className="flex-col">
             <h1 className="text-grey-500 pl-2">
               {AuthUser.displayName ? AuthUser.displayName : "Anonymous"}
