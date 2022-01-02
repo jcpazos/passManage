@@ -1,17 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
+import { editState } from "../atoms/editAtom";
 import { loginState } from "../atoms/loginAtom";
 
-function EditLogin() {
+function EditLogin({ name, username, password }) {
   const [login, setLogin] = useRecoilState(loginState);
+  const [edit, setEdit] = useRecoilState(editState);
   const [nameInput, setNameInput] = useState("");
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
 
+  const saveLogin = () => {
+    setLogin({
+      name: nameInput,
+      username: usernameInput,
+      password: passwordInput,
+    });
+    setEdit(null);
+  };
+
+  useEffect(() => {
+    username?.length > 0 && setUsernameInput(username);
+    password?.length > 0 && setPasswordInput(password);
+    name?.length > 0 && setNameInput(name);
+  }, [name, username, password]);
+
   return (
     <div className="flex-col">
       <div className="w-102 bg-gray-300 pt-1 pl-5 h-10">
-        <div className="button bg-white rounded border-2 h-8 w-16 border-black pl-3">
+        <div
+          className="button bg-white rounded border-2 h-8 w-16 border-black pl-3"
+          onClick={saveLogin}
+        >
           Save
         </div>
       </div>
@@ -26,8 +46,7 @@ function EditLogin() {
           <div className="flex-col pl-5">
             <input
               value={nameInput}
-              className="pl-2 w-60 bg-gray-100 hover:border-2 hover:border-blue-200 hover:bg-white focus:bg-white "
-              placeholder="Login"
+              className="pl-2 w-60 text-black bg-gray-100 hover:border-2 hover:border-blue-200 hover:bg-white focus:bg-white "
               type="text"
               onChange={(e) => {
                 setNameInput(e.target.value);
@@ -36,12 +55,12 @@ function EditLogin() {
           </div>
         </div>
         <br></br>
-        <div className="bg-white h-32 w-80 flex-col">
+        <div className="bg-white h-32 flex-grow flex-col">
           <div className="flex-col pl-5">
             <h3 className="pl-4">username</h3>
             <input
               value={usernameInput}
-              className="pl-2 w-28  hover:border-2 hover:border-blue-200 hover:bg-white focus:bg-white"
+              className="pl-2 w-28 flex-grow  hover:border-2 hover:border-blue-200 hover:bg-white focus:bg-white"
               type="text"
               onChange={(e) => {
                 setUsernameInput(e.target.value);
@@ -53,7 +72,7 @@ function EditLogin() {
             <h3 className="pl-4">password</h3>
             <input
               value={passwordInput}
-              className="pl-2 w-28  hover:border-2 hover:border-blue-200 hover:bg-white focus:bg-white"
+              className="pl-2 w-28 flex-grow hover:border-2 hover:border-blue-200 hover:bg-white focus:bg-white"
               type="password"
               onChange={(e) => {
                 setPasswordInput(e.target.value);
