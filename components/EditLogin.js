@@ -20,9 +20,9 @@ function EditLogin({ name, username, password }) {
   };
 
   useEffect(() => {
-    username?.length > 0 && setUsernameInput(username);
-    password?.length > 0 && setPasswordInput(password);
-    name?.length > 0 && setNameInput(name);
+    username?.length >= 0 && setUsernameInput(username);
+    password?.length >= 0 && setPasswordInput(password);
+    name?.length >= 0 && setNameInput(name);
   }, [name, username, password]);
 
   return (

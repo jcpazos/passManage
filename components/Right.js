@@ -22,7 +22,7 @@ function Right() {
               password={edit.password}
             />
           ) : (
-            <EditLogin />
+            <EditLogin name={""} username={""} password={""} />
           )
         ) : login === null ? (
           <LoginInfo

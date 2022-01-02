@@ -5,9 +5,8 @@ import {
   AuthAction,
 } from "next-firebase-auth";
 import Head from "next/head";
-import { LockClosed, LockClosedIcon } from "@heroicons/react/solid";
+import { LockClosedIcon } from "@heroicons/react/solid";
 import { useEffect, useState } from "react";
-import Main from "../components/Main";
 import Left from "../components/Left";
 import Center from "../components/Center";
 import Right from "../components/Right";

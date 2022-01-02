@@ -55,12 +55,12 @@ function EditLogin({ name, username, password }) {
                   value={password}
                 ></input>
               </div>
-              <div
-                className="button w-20 h-6 border-black border-2 bg-blue-200 pl-3"
+              <button
+                className="button w-20 h-7 border-black border-2 bg-blue-200"
                 onClick={() => setReveal(!reveal)}
               >
                 {reveal ? "Conceal" : "Reveal"}
-              </div>
+              </button>
             </div>
           </div>
         </div>
