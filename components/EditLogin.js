@@ -4,7 +4,13 @@ import { editState } from "../atoms/editAtom";
 import { loginState } from "../atoms/loginAtom";
 import { vaultState } from "../atoms/vaultAtom";
 import { getMessageEncoding, encrypt, decrypt } from "../utils/crypto";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+} from "firebase/firestore";
 import { useAuthUser } from "next-firebase-auth";
 
 function EditLogin({ name, username, password }) {
@@ -17,14 +23,32 @@ function EditLogin({ name, username, password }) {
   const [vault, setVault] = useRecoilState(vaultState);
 
   const decryptVault = (ciphertext, iv, salt) => {
-    decrypt(ciphertext, sessionStorage.getItem("key"), iv, salt)
+    let enc = new TextEncoder("utf-8");
+    let encoded = enc.encode(ciphertext);
+    console.log("encoded", encoded);
+
+    decrypt(encoded, sessionStorage.getItem("key"), iv, salt)
       .then((plaintext) => {
-        console.log(ciphertext);
+        console.log(encoded);
         console.log(plaintext);
       })
       .catch((err) => {
-        console.log(err);
+        console.error("error", err);
       });
+  };
+
+  const decryptDB = (iv, salt) => {
+    const db = getFirestore();
+    const vault = doc(db, "vaults", AuthUser.email);
+    let vaultEncrypted = [];
+    getDoc(vault).then((snap) => {
+      if (snap.exists()) {
+        console.log(snap.data());
+        const vault = snap.data().logins;
+        vaultEncrypted = vaultEncrypted.concat(vault);
+        vaultEncrypted.map((ct) => decryptVault(ct, iv, salt));
+      }
+    });
   };
 
   const saveLogin = () => {
@@ -55,13 +79,18 @@ function EditLogin({ name, username, password }) {
     Promise.all(promises)
       .then((encrypted) => {
         vaultEncrypted = encrypted;
-        console.log(vaultEncrypted);
-        console.log(JSON.stringify(vaultEncrypted[0]));
+        let encryptedLogins = [];
         const db = getFirestore();
-        vaultEncrypted.map((ct) =>
-          setDoc(doc(db, "vaults", AuthUser.email), ct)
-        );
-        vaultEncrypted.map((ct) => decryptVault(ct, iv, salt));
+        vaultEncrypted.map((ct) => {
+          //let ct = Array.from(new Uint8Array(ct));
+          console.log("reg", ct);
+          let dec = new TextDecoder();
+          let decoded = dec.decode(ct);
+          encryptedLogins.push(decoded);
+        });
+        setDoc(doc(db, "vaults", AuthUser.email), { logins: encryptedLogins });
+        console.log(encryptedLogins);
+        decryptDB(iv, salt);
       })
       .catch((err) => {
         console.error("error when encrypting", err);

@@ -43,11 +43,11 @@ const Home = () => {
   }, []);
 
   const verifyPassword = (password) => {
-    if (password === "password") {
+    if (password === "passord") {
       sessionStorage.setItem("key", password);
     }
 
-    return password === "password";
+    return password === "passord";
   };
 
   const enterPassword = (e) => {
