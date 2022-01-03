@@ -12,7 +12,13 @@ import Center from "../components/Center";
 import Right from "../components/Right";
 import getAbsoluteURL from "../utils/getAbsoluteURL";
 import Header from "../components/Header";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { useRecoilState } from "recoil";
 import { vaultState } from "../atoms/vaultAtom";
 
@@ -26,19 +32,19 @@ const Home = () => {
   useEffect(() => {
     let vaultArray = [];
     const db = getFirestore();
-    getDocs(collection(db, "vaults")).then((snapshot) => {
-      snapshot.forEach((doc) => {
-        if (doc.data().owner === AuthUser.email) {
-          vaultArray = vaultArray.concat(doc.data().logins);
-          console.log(doc.id, " => ", doc.data());
-        }
-      });
-      setVault(vaultArray);
+    const vault = doc(db, "vaults", AuthUser.email);
+    getDoc(vault).then((snap) => {
+      if (snap.exists()) {
+        const vault = snap.data().logins;
+        vaultArray = vaultArray.concat(vault);
+        setVault(vaultArray);
+      }
     });
   }, []);
 
   const verifyPassword = (password) => {
     if (password === "password") {
+      sessionStorage.setItem("key", password);
     }
 
     return password === "password";

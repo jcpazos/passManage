@@ -2,13 +2,30 @@ import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { editState } from "../atoms/editAtom";
 import { loginState } from "../atoms/loginAtom";
+import { vaultState } from "../atoms/vaultAtom";
+import { getMessageEncoding, encrypt, decrypt } from "../utils/crypto";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { useAuthUser } from "next-firebase-auth";
 
 function EditLogin({ name, username, password }) {
+  const AuthUser = useAuthUser();
   const [login, setLogin] = useRecoilState(loginState);
   const [edit, setEdit] = useRecoilState(editState);
   const [nameInput, setNameInput] = useState("");
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
+  const [vault, setVault] = useRecoilState(vaultState);
+
+  const decryptVault = (ciphertext, iv, salt) => {
+    decrypt(ciphertext, sessionStorage.getItem("key"), iv, salt)
+      .then((plaintext) => {
+        console.log(ciphertext);
+        console.log(plaintext);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const saveLogin = () => {
     setLogin({
@@ -17,6 +34,38 @@ function EditLogin({ name, username, password }) {
       password: passwordInput,
     });
     setEdit(null);
+    //encrypt vault info
+    let iv = window.crypto.getRandomValues(new Uint8Array(16));
+    let salt = window.crypto.getRandomValues(new Uint8Array(16));
+    //TODO: save to DB
+    let vaultEncrypted = [];
+    let promises = [];
+    vault.map((login) => {
+      let blob = JSON.stringify(login);
+      let encoded = getMessageEncoding(blob);
+      let encrypted = encrypt(
+        encoded,
+        salt,
+        sessionStorage.getItem("key", password),
+        iv
+      );
+      promises.push(encrypted);
+    });
+
+    Promise.all(promises)
+      .then((encrypted) => {
+        vaultEncrypted = encrypted;
+        console.log(vaultEncrypted);
+        console.log(JSON.stringify(vaultEncrypted[0]));
+        const db = getFirestore();
+        vaultEncrypted.map((ct) =>
+          setDoc(doc(db, "vaults", AuthUser.email), ct)
+        );
+        vaultEncrypted.map((ct) => decryptVault(ct, iv, salt));
+      })
+      .catch((err) => {
+        console.error("error when encrypting", err);
+      });
   };
 
   useEffect(() => {
