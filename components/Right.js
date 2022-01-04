@@ -20,9 +20,10 @@ function Right() {
               name={edit.name}
               username={edit.username}
               password={edit.password}
+              isNew={false}
             />
           ) : (
-            <EditLogin name={""} username={""} password={""} />
+            <EditLogin name={""} username={""} password={""} isNew={true} />
           )
         ) : login === null ? (
           <LoginInfo

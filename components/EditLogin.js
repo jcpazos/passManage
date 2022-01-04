@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import { useAuthUser } from "next-firebase-auth";
 
-function EditLogin({ name, username, password }) {
+function EditLogin({ name, username, password, isNew }) {
   const AuthUser = useAuthUser();
   const [login, setLogin] = useRecoilState(loginState);
   const [edit, setEdit] = useRecoilState(editState);
@@ -22,14 +22,14 @@ function EditLogin({ name, username, password }) {
   const [passwordInput, setPasswordInput] = useState("");
   const [vault, setVault] = useRecoilState(vaultState);
 
-  const decryptVault = (ciphertext, iv, salt) => {
-    let enc = new TextEncoder("utf-8");
-    let encoded = enc.encode(ciphertext);
-    console.log("encoded", encoded);
+  const decryptVault = (encodedCiphertext, iv, salt) => {
+    let parsed = JSON.parse(encodedCiphertext);
+    let ctArray = new Uint8Array(parsed);
+    console.log("encoded", parsed);
 
-    decrypt(encoded, sessionStorage.getItem("key"), iv, salt)
+    decrypt(ctArray, sessionStorage.getItem("key"), iv, salt)
       .then((plaintext) => {
-        console.log(encoded);
+        console.log(parsed);
         console.log(plaintext);
       })
       .catch((err) => {
@@ -52,27 +52,45 @@ function EditLogin({ name, username, password }) {
   };
 
   const saveLogin = () => {
-    setLogin({
+    const newLogin = {
       name: nameInput,
       username: usernameInput,
       password: passwordInput,
-    });
+    };
+
+    setLogin(newLogin);
     setEdit(null);
     //encrypt vault info
     let iv = window.crypto.getRandomValues(new Uint8Array(16));
     let salt = window.crypto.getRandomValues(new Uint8Array(16));
+    localStorage.setItem("iv", iv);
+    localStorage.setItem("salt", salt);
     //TODO: save to DB
     let vaultEncrypted = [];
     let promises = [];
-    vault.map((login) => {
-      let blob = JSON.stringify(login);
+    console.log("login");
+    console.log(newLogin.name);
+    console.log(newLogin.username);
+    console.log(newLogin.password);
+    let newVault;
+    if (isNew) {
+      newVault = [...vault, newLogin];
+    } else {
+      newVault = vault.map((item) => {
+        if (item.name === name) {
+          return newLogin;
+        } else {
+          return item;
+        }
+      });
+    }
+
+    setVault(newVault);
+    newVault.map((loginItem) => {
+      console.log("login2", loginItem);
+      let blob = JSON.stringify(loginItem);
       let encoded = getMessageEncoding(blob);
-      let encrypted = encrypt(
-        encoded,
-        salt,
-        sessionStorage.getItem("key", password),
-        iv
-      );
+      let encrypted = encrypt(encoded, salt, sessionStorage.getItem("key"), iv);
       promises.push(encrypted);
     });
 
@@ -84,9 +102,8 @@ function EditLogin({ name, username, password }) {
         vaultEncrypted.map((ct) => {
           //let ct = Array.from(new Uint8Array(ct));
           console.log("reg", ct);
-          let dec = new TextDecoder();
-          let decoded = dec.decode(ct);
-          encryptedLogins.push(decoded);
+          let stringified = JSON.stringify(Array.from(new Uint8Array(ct)));
+          encryptedLogins.push(stringified);
         });
         setDoc(doc(db, "vaults", AuthUser.email), { logins: encryptedLogins });
         console.log(encryptedLogins);
@@ -123,6 +140,7 @@ function EditLogin({ name, username, password }) {
           </div>
           <div className="flex-col pl-5">
             <input
+              placeholder="Login"
               value={nameInput}
               className="pl-2 w-60 text-black bg-gray-100 hover:border-2 hover:border-blue-200 hover:bg-white focus:bg-white "
               type="text"

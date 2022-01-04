@@ -21,6 +21,7 @@ import {
 } from "firebase/firestore";
 import { useRecoilState } from "recoil";
 import { vaultState } from "../atoms/vaultAtom";
+import { getMessageEncoding, encrypt, decrypt } from "../utils/crypto";
 
 const Home = () => {
   const AuthUser = useAuthUser();
@@ -29,14 +30,35 @@ const Home = () => {
   const [lockColor, setLockColor] = useState("text-grey-500");
   const [vault, setVault] = useRecoilState(vaultState);
 
+  const decryptLogin = (encodedCiphertext, iv, salt, vaultArray) => {
+    let parsed = JSON.parse(encodedCiphertext);
+    let ctArray = new Uint8Array(parsed);
+    console.log("encoded", parsed);
+
+    decrypt(ctArray, sessionStorage.getItem("key"), iv, salt)
+      .then((plaintext) => {
+        console.log(parsed);
+        console.log(plaintext);
+        vaultArray.push(plaintext);
+      })
+      .catch((err) => {
+        console.error("error", err);
+      });
+  };
+
   useEffect(() => {
     let vaultArray = [];
+    const iv = localStorage.getItem("iv");
+    const salt = localStorage.getItem("salt");
     const db = getFirestore();
     const vault = doc(db, "vaults", AuthUser.email);
+    let vaultEncrypted = [];
     getDoc(vault).then((snap) => {
       if (snap.exists()) {
+        console.log("snap", snap.data());
         const vault = snap.data().logins;
-        vaultArray = vaultArray.concat(vault);
+        vaultEncrypted = vaultEncrypted.concat(vault);
+        vaultEncrypted.map((ct) => decryptLogin(ct, iv, salt, vaultArray));
         setVault(vaultArray);
       }
     });

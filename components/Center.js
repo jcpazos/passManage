@@ -52,7 +52,7 @@ function Center() {
       <div id="sidebar-center-left" className="space-y-4  flex-shrink w-80 ">
         <div className="flex-grow">
           <div className="bg-gray-300 h-10 flex justify-center">
-            <h1 className="pt-2">{vault.length + " items"}</h1>
+            <h1 className="pt-2">{vault?.length + " items"}</h1>
           </div>
           <div className="flex justify-end">
             <PlusSmIcon
