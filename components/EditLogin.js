@@ -3,14 +3,8 @@ import { useRecoilState } from "recoil";
 import { editState } from "../atoms/editAtom";
 import { loginState } from "../atoms/loginAtom";
 import { vaultState } from "../atoms/vaultAtom";
-import { getMessageEncoding, encrypt, decrypt } from "../utils/crypto";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  updateDoc,
-  getDoc,
-} from "firebase/firestore";
+import { getMessageEncoding, encrypt } from "../utils/crypto";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useAuthUser } from "next-firebase-auth";
 
 function EditLogin({ name, username, password, isNew }) {
@@ -21,35 +15,6 @@ function EditLogin({ name, username, password, isNew }) {
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
   const [vault, setVault] = useRecoilState(vaultState);
-
-  const decryptVault = (encodedCiphertext, iv, salt) => {
-    let parsed = JSON.parse(encodedCiphertext);
-    let ctArray = new Uint8Array(parsed);
-    console.log("encoded", parsed);
-
-    decrypt(ctArray, sessionStorage.getItem("key"), iv, salt)
-      .then((plaintext) => {
-        console.log(parsed);
-        console.log(plaintext);
-      })
-      .catch((err) => {
-        console.error("error", err);
-      });
-  };
-
-  const decryptDB = (iv, salt) => {
-    const db = getFirestore();
-    const vault = doc(db, "vaults", AuthUser.email);
-    let vaultEncrypted = [];
-    getDoc(vault).then((snap) => {
-      if (snap.exists()) {
-        console.log(snap.data());
-        const vault = snap.data().logins;
-        vaultEncrypted = vaultEncrypted.concat(vault);
-        vaultEncrypted.map((ct) => decryptVault(ct, iv, salt));
-      }
-    });
-  };
 
   const saveLogin = () => {
     const newLogin = {
@@ -63,15 +28,12 @@ function EditLogin({ name, username, password, isNew }) {
     //encrypt vault info
     let iv = window.crypto.getRandomValues(new Uint8Array(16));
     let salt = window.crypto.getRandomValues(new Uint8Array(16));
-    localStorage.setItem("iv", iv);
-    localStorage.setItem("salt", salt);
+    localStorage.setItem("iv", JSON.stringify(Array.from(iv)));
+    localStorage.setItem("salt", JSON.stringify(Array.from(salt)));
     //TODO: save to DB
     let vaultEncrypted = [];
     let promises = [];
-    console.log("login");
-    console.log(newLogin.name);
-    console.log(newLogin.username);
-    console.log(newLogin.password);
+
     let newVault;
     if (isNew) {
       newVault = [...vault, newLogin];
@@ -87,7 +49,6 @@ function EditLogin({ name, username, password, isNew }) {
 
     setVault(newVault);
     newVault.map((loginItem) => {
-      console.log("login2", loginItem);
       let blob = JSON.stringify(loginItem);
       let encoded = getMessageEncoding(blob);
       let encrypted = encrypt(encoded, salt, sessionStorage.getItem("key"), iv);
@@ -100,13 +61,10 @@ function EditLogin({ name, username, password, isNew }) {
         let encryptedLogins = [];
         const db = getFirestore();
         vaultEncrypted.map((ct) => {
-          //let ct = Array.from(new Uint8Array(ct));
-          console.log("reg", ct);
           let stringified = JSON.stringify(Array.from(new Uint8Array(ct)));
           encryptedLogins.push(stringified);
         });
         setDoc(doc(db, "vaults", AuthUser.email), { logins: encryptedLogins });
-        console.log(encryptedLogins);
         decryptDB(iv, salt);
       })
       .catch((err) => {
