@@ -30,7 +30,7 @@ function EditLogin({ name, username, password, isNew }) {
     let salt = window.crypto.getRandomValues(new Uint8Array(16));
     localStorage.setItem("iv", JSON.stringify(Array.from(iv)));
     localStorage.setItem("salt", JSON.stringify(Array.from(salt)));
-    //TODO: save to DB
+
     let vaultEncrypted = [];
     let promises = [];
 
