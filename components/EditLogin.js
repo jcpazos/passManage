@@ -3,7 +3,7 @@ import { useRecoilState } from "recoil";
 import { editState } from "../atoms/editAtom";
 import { loginState } from "../atoms/loginAtom";
 import { vaultState } from "../atoms/vaultAtom";
-import { getMessageEncoding, encrypt } from "../utils/crypto";
+import { getMessageEncoding, encrypt, storeSecret } from "../utils/crypto";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useAuthUser } from "next-firebase-auth";
 
@@ -38,7 +38,7 @@ function EditLogin({ name, username, password, isNew }) {
     if (isNew) {
       newVault = [...vault, newLogin];
     } else {
-      newVault = vault.map((item) => {
+      newVault = vault?.map((item) => {
         if (item.name === name) {
           return newLogin;
         } else {
@@ -51,7 +51,13 @@ function EditLogin({ name, username, password, isNew }) {
     newVault.map((loginItem) => {
       let blob = JSON.stringify(loginItem);
       let encoded = getMessageEncoding(blob);
-      let encrypted = encrypt(encoded, salt, sessionStorage.getItem("key"), iv);
+      let encrypted = encrypt(
+        encoded,
+        salt,
+        sessionStorage.getItem("key"),
+        new Uint8Array(JSON.parse(sessionStorage.getItem("secret"))),
+        iv
+      );
       promises.push(encrypted);
     });
 
@@ -65,7 +71,7 @@ function EditLogin({ name, username, password, isNew }) {
           encryptedLogins.push(stringified);
         });
         setDoc(doc(db, "vaults", AuthUser.email), { logins: encryptedLogins });
-        decryptDB(iv, salt);
+        storeSecret(sessionStorage.getItem("secret"));
       })
       .catch((err) => {
         console.error("error when encrypting", err);

@@ -15,11 +15,12 @@ import Header from "../components/Header";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useRecoilState } from "recoil";
 import { vaultState } from "../atoms/vaultAtom";
-import { decrypt } from "../utils/crypto";
+import { decrypt, generateSecret, retrieveSecret } from "../utils/crypto";
 
 const Home = () => {
   const AuthUser = useAuthUser();
   const [showResults, setShowResults] = useState(false);
+  const [vaultEncrypted, setVaultEncrypted] = useState([]);
   const [input, setInput] = useState("");
   const [lockColor, setLockColor] = useState("text-grey-500");
   const [vault, setVault] = useRecoilState(vaultState);
@@ -27,43 +28,68 @@ const Home = () => {
   const decryptLogin = (encodedCiphertext, iv, salt) => {
     let parsed = JSON.parse(encodedCiphertext);
     let ctArray = new Uint8Array(parsed);
-    return decrypt(ctArray, sessionStorage.getItem("key"), iv, salt);
+    return decrypt(
+      ctArray,
+      sessionStorage.getItem("key"),
+      new Uint8Array(JSON.parse(sessionStorage.getItem("secret"))),
+      iv,
+      salt
+    );
+  };
+
+  const decryptVault = (vaultEncrypted) => {
+    const iv = new Uint8Array(JSON.parse(localStorage.getItem("iv")));
+    const salt = new Uint8Array(JSON.parse(localStorage.getItem("salt")));
+    let promises = [];
+
+    vaultEncrypted.map((ct) => {
+      let decrypted = decryptLogin(ct, iv, salt);
+      promises.push(decrypted);
+    });
+
+    Promise.all(promises)
+      .then((vaultArray) => {
+        let decodedVault = vaultArray.map((login) => {
+          return JSON.parse(login);
+        });
+        setVault(decodedVault);
+        setShowResults(true);
+      })
+      .catch((err) => {
+        console.error("error when decrypting", err);
+      });
   };
 
   useEffect(() => {
-    const iv = new Uint8Array(JSON.parse(localStorage.getItem("iv")));
-    const salt = new Uint8Array(JSON.parse(localStorage.getItem("salt")));
     const db = getFirestore();
     const vault = doc(db, "vaults", AuthUser.email);
-    let vaultEncrypted = [];
-    let promises = [];
 
     getDoc(vault).then((snap) => {
       if (snap.exists()) {
         const vault = snap.data().logins;
-        vaultEncrypted = vaultEncrypted.concat(vault);
-
-        vaultEncrypted.map((ct) => {
-          let decrypted = decryptLogin(ct, iv, salt);
-          promises.push(decrypted);
-        });
-
-        Promise.all(promises)
-          .then((vaultArray) => {
-            let decodedVault = vaultArray.map((login) => {
-              return JSON.parse(login);
-            });
-            setVault(decodedVault);
-          })
-          .catch((err) => {
-            console.error("error", err);
-          });
+        vaultEncrypted = vault;
+        setVaultEncrypted(vaultEncrypted);
       }
     });
   }, []);
 
   const verifyPassword = (password) => {
     if (password === "passord") {
+      if (!localStorage.getItem("encryptedSecret")) {
+        let secret = generateSecret(password);
+        sessionStorage.setItem("secret", secret);
+      } else {
+        retrieveSecret(password)
+          .then((secret) => {
+            sessionStorage.setItem(
+              "secret",
+              JSON.stringify(Array.from(new Uint8Array(secret)))
+            );
+          })
+          .catch((err) => {
+            console.error("error when decrypting secret", err);
+          });
+      }
       sessionStorage.setItem("key", password);
     }
 
@@ -73,7 +99,7 @@ const Home = () => {
   const enterPassword = (e) => {
     e.preventDefault();
     if (verifyPassword(input)) {
-      setShowResults(true);
+      decryptVault(vaultEncrypted);
     } else {
       setLockColor("text-red-500");
     }

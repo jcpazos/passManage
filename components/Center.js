@@ -63,7 +63,7 @@ function Center() {
         </div>
 
         <div className="pl-5 flex-col">
-          {vault.map((login) => (
+          {vault?.map((login) => (
             <div
               key={login.name}
               onClick={() => {
