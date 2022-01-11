@@ -17,12 +17,13 @@ import { useRecoilState } from "recoil";
 import { vaultState } from "../atoms/vaultAtom";
 import { decrypt, generateSecret, retrieveSecret } from "../utils/crypto";
 import FirstTimeSetup from "../components/FirstTimeSetup";
+import { firstTimeState } from "../atoms/firstTimeAtom";
 
 const Home = () => {
   const AuthUser = useAuthUser();
   const [showResults, setShowResults] = useState(false);
   const [vaultEncrypted, setVaultEncrypted] = useState([]);
-  const [showFirstTimeLogin, setShowFirstTimeLogin] = useState(false);
+  const [showFirstTime, setShowFirstTime] = useRecoilState(firstTimeState);
   const [input, setInput] = useState("");
   const [lockColor, setLockColor] = useState("text-grey-500");
   const [vault, setVault] = useRecoilState(vaultState);
@@ -63,13 +64,6 @@ const Home = () => {
   };
 
   useEffect(() => {
-    //TOOD: change this to use the authUser
-    if (!localStorage.getItem("encryptedSecret")) {
-      setShowFirstTimeLogin(true);
-    }
-  }, []);
-
-  useEffect(() => {
     const db = getFirestore();
     const vault = doc(db, "vaults", AuthUser.email);
 
@@ -78,6 +72,10 @@ const Home = () => {
         const vault = snap.data().logins;
         vaultEncrypted = vault;
         setVaultEncrypted(vaultEncrypted);
+      } else if (!localStorage.getItem("encryptedSecret")) {
+        if (!localStorage.getItem("encryptedSecret")) {
+          setShowFirstTime(true);
+        }
       }
     });
   }, []);
@@ -121,7 +119,7 @@ const Home = () => {
         {/*<link rel="icon" href="/favicon.ico" />*/}
       </Head>
 
-      {!!showFirstTimeLogin ? (
+      {showFirstTime ? (
         <FirstTimeSetup />
       ) : (
         !showResults && (
