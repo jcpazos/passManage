@@ -9,7 +9,7 @@ import {
   storeSecret,
   encryptLoginItem,
 } from "../utils/crypto";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { useAuthUser } from "next-firebase-auth";
 
 function EditLogin({ name, username, password, isNew }) {
@@ -33,6 +33,7 @@ function EditLogin({ name, username, password, isNew }) {
 
     let vaultEncrypted = [];
     let promises = [];
+    let promisesData = [];
 
     let newVault;
     if (isNew) {
@@ -70,8 +71,9 @@ function EditLogin({ name, username, password, isNew }) {
 
       let encrypted = encryptLoginItem(loginItem);
 
-      promises.push({
-        encryptedItem: encrypted.encryptedItem,
+      promises.push(encrypted.encryptedItem);
+
+      promisesData.push({
         salt: encrypted.salt,
         iv: encrypted.iv,
       });
@@ -80,9 +82,17 @@ function EditLogin({ name, username, password, isNew }) {
     //TODO: fix issue with promises not being resolved because they're in an object
     Promise.all(promises)
       .then((encrypted) => {
-        vaultEncrypted = encrypted;
+        for (let i = 0; i < encrypted.length; i++) {
+          vaultEncrypted[i] = {
+            encryptedItem: encrypted[i],
+            salt: promisesData[i].salt,
+            iv: promisesData[i].iv,
+          };
+        }
         let encryptedLogins = [];
         const db = getFirestore();
+        let encryptedSecret = localStorage.getItem("encryptedSecret");
+
         console.log("vaultEncrypted", vaultEncrypted);
         vaultEncrypted.map(({ encryptedItem, salt, iv }) => {
           let stringified = JSON.stringify(
@@ -95,7 +105,10 @@ function EditLogin({ name, username, password, isNew }) {
             iv: iv,
           });
         });
-        setDoc(doc(db, "vaults", AuthUser.email), { logins: encryptedLogins });
+        setDoc(doc(db, "vaults", AuthUser.email), {
+          logins: encryptedLogins,
+          encryptedSecret: encryptedSecret,
+        });
         storeSecret(sessionStorage.getItem("secret"));
       })
       .catch((err) => {

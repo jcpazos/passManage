@@ -1,12 +1,8 @@
 import React, { useState } from "react";
 import { useRecoilState } from "recoil";
 import { firstTimeState } from "../atoms/firstTimeAtom";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
-import {
-  digestMessage,
-  encryptLoginItem,
-  generateSecret,
-} from "../utils/crypto";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { encryptLoginItem, generateSecret } from "../utils/crypto";
 import { useAuthUser } from "next-firebase-auth";
 
 function FirstTimeSetup() {
@@ -38,16 +34,19 @@ function FirstTimeSetup() {
       console.log("iv", encryptedLoginItem.iv);
       console.log("encryptedSecret", encryptedSecret);
       console.log("tuti");
+      let logins = [
+        {
+          encryptedItem: stringified,
+          salt: encryptedLoginItem.salt,
+          iv: encryptedLoginItem.iv,
+        },
+      ];
+
       setDoc(doc(db, "vaults", AuthUser.email), {
-        logins: [
-          {
-            encryptedItem: stringified,
-            salt: encryptedLoginItem.salt,
-            iv: encryptedLoginItem.iv,
-          },
-        ],
+        logins: logins,
         encryptedSecret: encryptedSecret,
       });
+      //TODO: set vault state for first time use
     });
   };
 
@@ -59,13 +58,9 @@ function FirstTimeSetup() {
       let secret = generateSecret(password);
       sessionStorage.setItem("secret", secret);
       sessionStorage.setItem("key", password);
-      /*const digest = await digestMessage(password);
-      console.log(digest);*/
 
       await saveFirstAccount(password);
       setErrors("");
-      //TODO: hash password and save to firebase
-      //localStorage.setItem("encryptedSecret", JSON.stringify(password));
       setShowFirstTime(false);
     }
   };
