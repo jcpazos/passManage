@@ -11,6 +11,14 @@ function generateId(len) {
   return Array.from(arr, dec2hex).join("");
 }
 
+//Hash a message using SHA-256
+async function digestMessage(message) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return hash;
+}
+
 /*
   Fetch the contents of the "message" textbox, and encode it
   in a form we can use for the encrypt operation.
@@ -130,6 +138,28 @@ function storeSecret(secret) {
   });
 }
 
+function encryptLoginItem(loginItem) {
+  let iv = window.crypto.getRandomValues(new Uint8Array(16));
+  let salt = window.crypto.getRandomValues(new Uint8Array(16));
+  localStorage.setItem("iv", JSON.stringify(Array.from(iv)));
+  localStorage.setItem("salt", JSON.stringify(Array.from(salt)));
+
+  let blob = JSON.stringify(loginItem);
+  let encoded = getMessageEncoding(blob);
+  let encrypted = encrypt(
+    encoded,
+    salt,
+    sessionStorage.getItem("key"),
+    new Uint8Array(JSON.parse(sessionStorage.getItem("secret"))),
+    iv
+  );
+  return {
+    encryptedItem: encrypted,
+    salt: JSON.stringify(Array.from(salt)),
+    iv: JSON.stringify(Array.from(iv)),
+  };
+}
+
 export {
   encrypt,
   decrypt,
@@ -138,4 +168,6 @@ export {
   generateSecret,
   retrieveSecret,
   storeSecret,
+  digestMessage,
+  encryptLoginItem,
 };

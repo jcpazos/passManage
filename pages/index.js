@@ -41,12 +41,17 @@ const Home = () => {
   };
 
   const decryptVault = (vaultEncrypted) => {
-    const iv = new Uint8Array(JSON.parse(localStorage.getItem("iv")));
-    const salt = new Uint8Array(JSON.parse(localStorage.getItem("salt")));
+    //const iv = new Uint8Array(JSON.parse(localStorage.getItem("iv")));
+    //const salt = new Uint8Array(JSON.parse(localStorage.getItem("salt")));
     let promises = [];
-
-    vaultEncrypted.map((ct) => {
-      let decrypted = decryptLogin(ct, iv, salt);
+    console.log(vaultEncrypted);
+    vaultEncrypted.map(({ encryptedItem, salt, iv }) => {
+      console.log("ct", encryptedItem);
+      console.log("salt", salt);
+      console.log("iv", iv);
+      iv = new Uint8Array(JSON.parse(iv));
+      salt = new Uint8Array(JSON.parse(salt));
+      let decrypted = decryptLogin(encryptedItem, iv, salt);
       promises.push(decrypted);
     });
 
@@ -68,48 +73,48 @@ const Home = () => {
     const vault = doc(db, "vaults", AuthUser.email);
 
     getDoc(vault).then((snap) => {
-      if (snap.exists()) {
+      if (snap.exists() && !!snap.data().encryptedSecret) {
+        if (!localStorage.getItem("encryptedSecret")) {
+          localStorage.setItem(snap.data().encryptedSecret);
+        }
         const vault = snap.data().logins;
         vaultEncrypted = vault;
         setVaultEncrypted(vaultEncrypted);
-      } else if (!localStorage.getItem("encryptedSecret")) {
-        if (!localStorage.getItem("encryptedSecret")) {
-          setShowFirstTime(true);
-        }
+      } else {
+        setShowFirstTime(true);
       }
     });
   }, []);
 
-  const verifyPassword = (password) => {
-    if (password === "passord") {
-      if (!localStorage.getItem("encryptedSecret")) {
-        let secret = generateSecret(password);
-        sessionStorage.setItem("secret", secret);
-      } else {
-        retrieveSecret(password)
-          .then((secret) => {
-            sessionStorage.setItem(
-              "secret",
-              JSON.stringify(Array.from(new Uint8Array(secret)))
-            );
-          })
-          .catch((err) => {
-            console.error("error when decrypting secret", err);
-          });
-      }
-      sessionStorage.setItem("key", password);
-    }
+  const verifyPassword = async (password) => {
+    //TODO: make retrieveSecret the check for whether the password is correct
 
-    return password === "passord";
+    try {
+      let secret = await retrieveSecret(password);
+      if (!!secret) {
+        sessionStorage.setItem(
+          "secret",
+          JSON.stringify(Array.from(new Uint8Array(secret)))
+        );
+        sessionStorage.setItem("key", password);
+        return true;
+      }
+    } catch (err) {
+      console.error("error when decrypting secret", err);
+      return false;
+    }
   };
 
-  const enterPassword = (e) => {
+  const enterPassword = async (e) => {
     e.preventDefault();
-    if (verifyPassword(input)) {
-      decryptVault(vaultEncrypted);
-    } else {
-      setLockColor("text-red-500");
-    }
+    //let verification = await verifyPassword(input);
+    verifyPassword(input).then((result) => {
+      if (result) {
+        decryptVault(vaultEncrypted);
+      } else {
+        setLockColor("text-red-500");
+      }
+    });
   };
 
   return (

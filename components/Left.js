@@ -1,22 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  FlagIcon,
-  CubeTransparentIcon,
-  StarIcon,
-  ExclamationIcon,
-  LockOpenIcon,
-  KeyIcon,
-  RefreshIcon,
-  ExclamationCircleIcon,
-  ShieldExclamationIcon,
-  WifiIcon,
-  ClockIcon,
-  LockClosedIcon,
-  PaperClipIcon,
-  CreditCardIcon,
-  IdentificationIcon,
-  ArchiveIcon,
-} from "@heroicons/react/solid";
+import { FlagIcon } from "@heroicons/react/solid";
 import LeftComponent from "./LeftComponent";
 import { useAuthUser } from "next-firebase-auth";
 

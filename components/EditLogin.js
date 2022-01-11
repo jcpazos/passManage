@@ -3,7 +3,12 @@ import { useRecoilState } from "recoil";
 import { editState } from "../atoms/editAtom";
 import { loginState } from "../atoms/loginAtom";
 import { vaultState } from "../atoms/vaultAtom";
-import { getMessageEncoding, encrypt, storeSecret } from "../utils/crypto";
+import {
+  getMessageEncoding,
+  encrypt,
+  storeSecret,
+  encryptLoginItem,
+} from "../utils/crypto";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useAuthUser } from "next-firebase-auth";
 
@@ -25,11 +30,6 @@ function EditLogin({ name, username, password, isNew }) {
 
     setLogin(newLogin);
     setEdit(null);
-    //encrypt vault info
-    let iv = window.crypto.getRandomValues(new Uint8Array(16));
-    let salt = window.crypto.getRandomValues(new Uint8Array(16));
-    localStorage.setItem("iv", JSON.stringify(Array.from(iv)));
-    localStorage.setItem("salt", JSON.stringify(Array.from(salt)));
 
     let vaultEncrypted = [];
     let promises = [];
@@ -47,9 +47,18 @@ function EditLogin({ name, username, password, isNew }) {
       });
     }
 
+    //encrypt vault info
+    //TODO: this is BAD, we are reusing IV and salt for different encryptions
+    //solution is probably to store iv and salt alongside encrypted string in firestore
+    //will need to change the schema to store a map of iv, salt, and encrypted string
+    /*let iv = window.crypto.getRandomValues(new Uint8Array(16));
+    let salt = window.crypto.getRandomValues(new Uint8Array(16));
+    localStorage.setItem("iv", JSON.stringify(Array.from(iv)));
+    localStorage.setItem("salt", JSON.stringify(Array.from(salt)));*/
+
     setVault(newVault);
     newVault.map((loginItem) => {
-      let blob = JSON.stringify(loginItem);
+      /*let blob = JSON.stringify(loginItem);
       let encoded = getMessageEncoding(blob);
       let encrypted = encrypt(
         encoded,
@@ -57,18 +66,34 @@ function EditLogin({ name, username, password, isNew }) {
         sessionStorage.getItem("key"),
         new Uint8Array(JSON.parse(sessionStorage.getItem("secret"))),
         iv
-      );
-      promises.push(encrypted);
+      );*/
+
+      let encrypted = encryptLoginItem(loginItem);
+
+      promises.push({
+        encryptedItem: encrypted.encryptedItem,
+        salt: encrypted.salt,
+        iv: encrypted.iv,
+      });
     });
 
+    //TODO: fix issue with promises not being resolved because they're in an object
     Promise.all(promises)
       .then((encrypted) => {
         vaultEncrypted = encrypted;
         let encryptedLogins = [];
         const db = getFirestore();
-        vaultEncrypted.map((ct) => {
-          let stringified = JSON.stringify(Array.from(new Uint8Array(ct)));
-          encryptedLogins.push(stringified);
+        console.log("vaultEncrypted", vaultEncrypted);
+        vaultEncrypted.map(({ encryptedItem, salt, iv }) => {
+          let stringified = JSON.stringify(
+            Array.from(new Uint8Array(encryptedItem))
+          );
+          console.log("stringified", stringified);
+          encryptedLogins.push({
+            encryptedItem: stringified,
+            salt: salt,
+            iv: iv,
+          });
         });
         setDoc(doc(db, "vaults", AuthUser.email), { logins: encryptedLogins });
         storeSecret(sessionStorage.getItem("secret"));

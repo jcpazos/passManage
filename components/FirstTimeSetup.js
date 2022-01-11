@@ -1,23 +1,72 @@
 import React, { useState } from "react";
 import { useRecoilState } from "recoil";
 import { firstTimeState } from "../atoms/firstTimeAtom";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  digestMessage,
+  encryptLoginItem,
+  generateSecret,
+} from "../utils/crypto";
+import { useAuthUser } from "next-firebase-auth";
 
 function FirstTimeSetup() {
+  const AuthUser = useAuthUser();
   const [errors, setErrors] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showFirstTime, setShowFirstTime] = useRecoilState(firstTimeState);
 
-  const savePassword = (e) => {
+  const saveFirstAccount = async (password) => {
+    const newLogin = {
+      name: "passManage Account",
+      username: AuthUser.email,
+      password: password,
+    };
+
+    const db = getFirestore();
+
+    let encryptedLoginItem = encryptLoginItem(newLogin);
+
+    encryptedLoginItem.encryptedItem.then((ct) => {
+      let stringified = JSON.stringify(Array.from(new Uint8Array(ct)));
+      let encryptedSecret = localStorage.getItem("encryptedSecret");
+
+      console.log("login", stringified);
+      console.log("db", db);
+      console.log("email", AuthUser.email);
+      console.log("salt", encryptedLoginItem.salt);
+      console.log("iv", encryptedLoginItem.iv);
+      console.log("encryptedSecret", encryptedSecret);
+      console.log("tuti");
+      setDoc(doc(db, "vaults", AuthUser.email), {
+        logins: [
+          {
+            encryptedItem: stringified,
+            salt: encryptedLoginItem.salt,
+            iv: encryptedLoginItem.iv,
+          },
+        ],
+        encryptedSecret: encryptedSecret,
+      });
+    });
+  };
+
+  const savePassword = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setErrors("Passwords do not match");
     } else {
+      let secret = generateSecret(password);
+      sessionStorage.setItem("secret", secret);
+      sessionStorage.setItem("key", password);
+      /*const digest = await digestMessage(password);
+      console.log(digest);*/
+
+      await saveFirstAccount(password);
       setErrors("");
-      setShowFirstTime(false);
       //TODO: hash password and save to firebase
       //localStorage.setItem("encryptedSecret", JSON.stringify(password));
+      setShowFirstTime(false);
     }
   };
 
