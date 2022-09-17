@@ -111,10 +111,11 @@ function generateSecret(password) {
 
 /*Retrieve the client secret*/
 function retrieveSecret(password) {
-  let salt = new Uint8Array(JSON.parse(localStorage.getItem("secretSalt")));
+  /*let salt = new Uint8Array(JSON.parse(localStorage.getItem("secretSalt")));
   let iv = new Uint8Array(JSON.parse(localStorage.getItem("secretIV")));
   let ct = new Uint8Array(JSON.parse(localStorage.getItem("encryptedSecret")));
-  return decrypt(ct, password, new Uint8Array(), iv, salt, false);
+  return decrypt(ct, password, new Uint8Array(), iv, salt, false);*/
+  return localStorage.getItem("clientSecret");
 }
 
 /*Store the client secret with a new IV and salt*/

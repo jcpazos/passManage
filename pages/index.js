@@ -34,15 +34,13 @@ const Home = () => {
     return decrypt(
       ctArray,
       sessionStorage.getItem("key"),
-      new Uint8Array(JSON.parse(sessionStorage.getItem("secret"))),
+      new Uint8Array(JSON.parse(localStorage.getItem("clientSecret"))),
       iv,
       salt
     );
   };
 
   const decryptVault = (vaultEncrypted) => {
-    //const iv = new Uint8Array(JSON.parse(localStorage.getItem("iv")));
-    //const salt = new Uint8Array(JSON.parse(localStorage.getItem("salt")));
     let promises = [];
     console.log(vaultEncrypted);
     vaultEncrypted.map(({ encryptedItem, salt, iv }) => {
@@ -75,7 +73,7 @@ const Home = () => {
     getDoc(vault).then((snap) => {
       if (snap.exists() && !!snap.data().encryptedSecret) {
         if (!localStorage.getItem("encryptedSecret")) {
-          localStorage.setItem(snap.data().encryptedSecret);
+          localStorage.setItem("encryptedSecret", snap.data().encryptedSecret);
         }
         const vault = snap.data().logins;
         vaultEncrypted = vault;
@@ -91,11 +89,12 @@ const Home = () => {
 
     try {
       let secret = await retrieveSecret(password);
+      console.log("client secret", secret);
       if (!!secret) {
-        sessionStorage.setItem(
-          "secret",
+        /*localStorage.setItem(
+          "clientSecret",
           JSON.stringify(Array.from(new Uint8Array(secret)))
-        );
+        );*/
         sessionStorage.setItem("key", password);
         return true;
       }
